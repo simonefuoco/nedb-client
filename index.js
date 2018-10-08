@@ -1,9 +1,9 @@
 const DataStore = require('nedb');
 
-DataStore.prototype.insertAsync = function (docs) {
+DataStore.prototype.insertAsync = function () {
     const self = this;
     return new Promise((resolve) => {
-        self.insert(docs, (err, newDocs) => {
+        self.insert(arguments[0], (err, newDocs) => {
             if(err) {
                 resolve(err, null)
             }
@@ -29,13 +29,15 @@ DataStore.prototype.findAsync = function () {
         });
     }
     else if(typeof arguments[1] === 'object') {
-        return self.find(arguments[0], arguments[1], (err, docs) => {
-            if(err) {
-                resolve(err, null);
-            }
-            else {
-                resolve(null, docs);
-            }
+        return new Promise((resolve) => {
+            self.find(arguments[0], arguments[1], (err, docs) => {
+                if(err) {
+                    resolve(err, null);
+                }
+                else {
+                    resolve(null, docs);
+                }
+            });
         });
     }
     else {
@@ -43,8 +45,32 @@ DataStore.prototype.findAsync = function () {
     }
 };
 
-DataStore.prototype.count = function () {
-    //
+DataStore.prototype.countAsync = function () {
+    const self = this;
+    return new Promise((resolve) => {
+        self.count(arguments[0], (err, count) => {
+            if(err) {
+                resolve(err, null);
+            }
+            else {
+                resolve(null, count);
+            }
+        });
+    });
 };
+
+DataStore.prototype.removeAsync = function () {
+    const self = this;
+    return new Promise((resolve) => {
+        self.remove(arguments[0], arguments[1], (err, numRemoved) => {
+            if(err) {
+                resolve(err, null);
+            }
+            else {
+                resolve(null, err);
+            }
+        });
+    });
+}
 
 module.exports.default = DataStore;
