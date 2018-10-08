@@ -5,10 +5,10 @@ DataStore.prototype.insertAsync = function () {
     return new Promise((resolve) => {
         self.insert(arguments[0], (err, newDocs) => {
             if(err) {
-                resolve(err, null)
+                resolve([err, null])
             }
             else {
-                resolve(null, newDocs);
+                resolve([null, newDocs]);
             }
         });
     });
@@ -20,10 +20,10 @@ DataStore.prototype.findAsync = function () {
         return new Promise((resolve) => {
             self.find(arguments[0], (err, docs) => {
                 if(err) {
-                    resolve(err, null);
+                    resolve([err, null]);
                 }
                 else {
-                    resolve(null, docs);
+                    resolve([null, docs]);
                 }
             });
         });
@@ -32,10 +32,10 @@ DataStore.prototype.findAsync = function () {
         return new Promise((resolve) => {
             self.find(arguments[0], arguments[1], (err, docs) => {
                 if(err) {
-                    resolve(err, null);
+                    resolve([err, null]);
                 }
                 else {
-                    resolve(null, docs);
+                    resolve([null, docs]);
                 }
             });
         });
@@ -50,10 +50,10 @@ DataStore.prototype.countAsync = function () {
     return new Promise((resolve) => {
         self.count(arguments[0], (err, count) => {
             if(err) {
-                resolve(err, null);
+                resolve([err, null]);
             }
             else {
-                resolve(null, count);
+                resolve([null, count]);
             }
         });
     });
@@ -64,10 +64,10 @@ DataStore.prototype.removeAsync = function () {
     return new Promise((resolve) => {
         self.remove(arguments[0], arguments[1], (err, numRemoved) => {
             if(err) {
-                resolve(err, null);
+                resolve([err, null]);
             }
             else {
-                resolve(null, err);
+                resolve([null, err]);
             }
         });
     });
