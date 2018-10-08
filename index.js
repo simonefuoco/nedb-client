@@ -73,4 +73,4 @@ DataStore.prototype.removeAsync = function () {
     });
 }
 
-module.exports.default = DataStore;
+module.exports = DataStore;
