@@ -1,60 +1,70 @@
 const DataStore = require('nedb');
+const fs = require('fs');
+const util = require('util');
 
-DataStore.prototype.insertAsync = function () {
-    const self = this;
-    return new Promise((resolve) => {
-        self.insert(arguments[0], (err, newDocs) => {
-            resolve({err, newDocs});
-        });
-    });
+let pool = {};
+const insertOld = DataStore.insert;
+const findOld = DataStore.find;
+const countOld = DataStore.count;
+const removeOld = DataStore.remove;
+const updateOld = DataStore.update;
+
+DataStore.prototype.insert = function () {
+    return util.promisify(insertOld)(arguments[0]);
 };
 
 DataStore.prototype.findAsync = function () {
-    const self = this;
     if (!arguments[1]) {
-        return new Promise((resolve) => {
-            self.find(arguments[0], (err, docs) => {
-                resolve({err, docs});
-            });
-        });
+        return util.promisify(findOld)(arguments[0]);
     }
     else if(typeof arguments[1] === 'object') {
-        return new Promise((resolve) => {
-            self.find(arguments[0], arguments[1], (err, docs) => {
-                resolve({err, docs});
-            });
-        });
+        return util.promisify(arguments[0], arguments[1]);
     }
     else {
-        return self.find(...arguments);
+        return findOld(...arguments);
     }
 };
 
 DataStore.prototype.countAsync = function () {
-    const self = this;
-    return new Promise((resolve) => {
-        self.count(arguments[0], (err, count) => {
-            resolve({err, count});
-        });
-    });
+    return util.promisify(countOld)(arguments[0]);
 };
 
 DataStore.prototype.removeAsync = function () {
-    const self = this;
-    return new Promise((resolve) => {
-        self.remove(arguments[0], arguments[1], (err, numRemoved) => {
-            resolve({err, numRemoved});
-        });
-    });
+    return util.promisify(removeOld)(arguments[0], arguments[1]);
 };
 
 DataStore.prototype.updateAsync = function () {
-    const self = this;
-    return new Promise((resolve) => {
-        self.update(arguments[0], arguments[1], arguments[2], (err, numAffected, affectedDocuments, upsert) => {
-            resolve({err, numAffected, affectedDocuments, upsert});
-        });
-    });
+    return util.promisify(updateOld)(arguments[0], arguments[1], arguments[2]);
 };
 
-module.exports = DataStore;
+
+module.exports.acquire = function (name, path) {
+    if (pool[name]) {
+        return pool[name].store;
+    }
+    else {
+        pool[name] = {};
+        pool[name].path = path;
+        pool[name].store = new DataStore({
+            filename: pool[name].path,
+            autoload: true
+        });
+        return pool[name].store;
+    }
+};
+
+module.exports.release = async (name) => {
+    delete pool[name].store;
+    await util.promisify(fs.unlink)(pool.path);
+    delete pool[name];
+};
+
+module.exports.releaseAll = async () => {
+    let promises = [];
+    for (const [key, value] of Object.entries(pool)) {
+        delete value.store;
+        promises.push(util.promisify(fs.unlink)(value.path));
+    }
+    await Promise.all(promises);
+    pool = [];
+};
