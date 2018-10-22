@@ -13,7 +13,7 @@ DataStore.prototype.insert = function () {
     return util.promisify(insertOld)(arguments[0]);
 };
 
-DataStore.prototype.findAsync = function () {
+DataStore.prototype.find = function () {
     if (!arguments[1]) {
         return util.promisify(findOld)(arguments[0]);
     }
@@ -25,15 +25,15 @@ DataStore.prototype.findAsync = function () {
     }
 };
 
-DataStore.prototype.countAsync = function () {
+DataStore.prototype.count = function () {
     return util.promisify(countOld)(arguments[0]);
 };
 
-DataStore.prototype.removeAsync = function () {
+DataStore.prototype.remove = function () {
     return util.promisify(removeOld)(arguments[0], arguments[1]);
 };
 
-DataStore.prototype.updateAsync = function () {
+DataStore.prototype.update = function () {
     return util.promisify(updateOld)(arguments[0], arguments[1], arguments[2]);
 };
 
